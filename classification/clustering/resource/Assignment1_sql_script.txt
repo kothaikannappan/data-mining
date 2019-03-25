@@ -1,0 +1,32 @@
+
+
+-- product cluster--
+
+CREATE TABLE productcluseter as SELECT
+ ITEM_SK,
+ sum(SELLING_RETAIL_AMT) as TOTAL_REVENUE,
+ count(distinct TRANSACTION_RK) as BASKETS,
+ count(distinct CUSTOMER_SK) as DISTINCT_CUSTOMERS,
+ avg(SELLING_RETAIL_AMT/NULLIF(ITEM_QTY,0)) as AVERAGE_PRICE  FROM dataset01.sales219
+ GROUP BY ITEM_SK
+ ORDER BY TOTAL_REVENUE DESC LIMIT 2000;
+
+
+
+create table productcluster as select a.*,b.PM_CAT_ENG_DESC,b.PM_DEP_ENG_DESC from productcluseter a, dataset01.items b where a.ITEM_SK = b.ITEM_SK;
+
+-customerclusterer-
+
+CREATE TABLE customercluseter as SELECT
+ CUSTOMER_SK, sum(ITEM_QTY) as TOTAL_No_Of_PURCHASE, sum(SELLING_RETAIL_AMT) as TOTAL_REVENUE,
+ DATEDIFF('2016-01-01',max(date)) as RECENCY, count(distinct( TRANSACTION_RK )) as TOTAL_No_of_VISITS,
+ count(distinct ITEM_SK) as DISTINCT_PRODUCTS,
+ SUM(SELLING_RETAIL_AMT)/count(distinct( TRANSACTION_RK )) as AVERAGE_SPEND  FROM dataset01.sales219
+ GROUP BY CUSTOMER_SK
+ ORDER BY TOTAL_REVENUE DESC LIMIT 2000;
+
+
+
+create table customercluster as select a.*,b.CITY_NM,b.CUSTOMER_TYPE_CD from customercluseter a, dataset01.members b where a.CUSTOMER_SK = b.CUSTOMER_SK;
+
+
